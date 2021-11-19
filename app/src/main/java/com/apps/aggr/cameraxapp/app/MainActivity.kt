@@ -1,4 +1,4 @@
-package com.apps.aggr.cameraxapp
+package com.apps.aggr.cameraxapp.app
 
 import android.os.Bundle
 import android.view.Window
@@ -7,7 +7,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
-import com.apps.aggr.cameraxapp.takephoto.CameraXFragment
+import com.apps.aggr.cameraxapp.R
+import com.apps.aggr.cameraxapp.app.takephoto.CameraXFragment
 
 class MainActivity : AppCompatActivity(), LifecycleOwner {
 

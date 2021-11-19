@@ -18,4 +18,6 @@
     <string name="error_permission_is_off">Permission is off.</string>
     <string name="error_image_is_off_frame">Image is off the frame.</string>
     <string name="error_failed_to_clip_image">Failed to clip image.</string>
+    <string name="taken_photos">Taken Photos</string>
+    <string name="cropped_photos">Cropped Photos</string>
 </resources>

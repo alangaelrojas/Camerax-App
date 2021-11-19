@@ -1,4 +1,4 @@
-package com.apps.aggr.cameraxapp.listphotos
+package com.apps.aggr.cameraxapp.app.listphotos
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -10,17 +10,16 @@ import com.apps.aggr.cameraxapp.R
 import com.bumptech.glide.Glide
 import java.io.File
 
-class ListPhotosAdapter(
+class ListPhotosCroppedAdapter(
     private val context: Context,
-    private val onPhotoSelected: OnPhotoSelected
-) : RecyclerView.Adapter<ListPhotosAdapter.holderPhotos>() {
+    private val onPhotoSelected: OnPhotoCroppedSelected
+) : RecyclerView.Adapter<ListPhotosCroppedAdapter.holderPhotos>() {
 
     private val listPhotos = ArrayList<File>()
 
     fun addPhotos(array: Array<File>){
-        array.forEach {
-            listPhotos.add(it)
-        }
+        listPhotos.clear()
+        listPhotos.addAll(array)
         notifyDataSetChanged()
     }
 
@@ -43,12 +42,12 @@ class ListPhotosAdapter(
         init {
             photo.setOnClickListener {
                 val photo = listPhotos[adapterPosition]
-                onPhotoSelected.onClickPhoto(photo.absolutePath)
+                onPhotoSelected.onClickPhotoCropped(photo.absolutePath)
             }
         }
     }
 
-    interface OnPhotoSelected{
-        fun onClickPhoto(path: String)
+    interface OnPhotoCroppedSelected{
+        fun onClickPhotoCropped(path: String)
     }
 }

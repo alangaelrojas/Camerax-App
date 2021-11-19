@@ -6,7 +6,7 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".cropphoto.ImageCropperActivity">
+    tools:context=".app.cropphoto.ImageCropperActivity">
 
   <include
       android:id="@+id/toolbar"

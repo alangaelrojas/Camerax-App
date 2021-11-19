@@ -1,4 +1,4 @@
-package com.apps.aggr.cameraxapp.takephoto
+package com.apps.aggr.cameraxapp.app.takephoto
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -20,9 +20,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
-import com.apps.aggr.cameraxapp.MainActivity
+import com.apps.aggr.cameraxapp.app.MainActivity
 import com.apps.aggr.cameraxapp.R
-import com.apps.aggr.cameraxapp.listphotos.ListPhotosFragment
+import com.apps.aggr.cameraxapp.app.cropphoto.ImageCropperActivity
+import com.apps.aggr.cameraxapp.app.listphotos.ListPhotosFragment
+import com.apps.aggr.cameraxapp.utils.Constants.NORMAL_PATH_FOLDER
+import com.apps.aggr.cameraxapp.utils.Constants.getOutputMediaFile
 import com.bumptech.glide.Glide
 import java.io.File
 
@@ -96,10 +99,10 @@ class CameraXFragment : Fragment(), LifecycleOwner {
                 takePhoto.visibility = View.VISIBLE
             }
         }
+
         // Ask for camera permissions
         if (allPermissionsGranted()) {
             viewFinder.post { startCamera() }
-
         } else {
             activity?.let {
                 ActivityCompat.requestPermissions(
@@ -108,32 +111,18 @@ class CameraXFragment : Fragment(), LifecycleOwner {
             }
         }
 
-        lastPicture.setOnClickListener {
-
-            CameraX.unbindAll()
-
-            activity?.supportFragmentManager
-                ?.beginTransaction()
-                ?.replace(R.id.fragment, ListPhotosFragment.newInstance())
-                ?.addToBackStack("")
-                ?.commit()
-
-            /*
-            file?.let{ _file ->
-                _file.delete()
-                lastPicture.setImageBitmap(null)
-                Toast.makeText(context, "Eliminado", Toast.LENGTH_SHORT).show()
-            }
-
-             */
-        }
-        btnFiles.setOnClickListener {
-            MainActivity.changeFragment(requireActivity(), ListPhotosFragment())
-        }
-
         //Every time the provided texture view changes, recompute layout
         viewFinder.addOnLayoutChangeListener{ _, _, _, _, _, _, _, _, _ ->
             updateTransform()
+        }
+
+        lastPicture.setOnClickListener {
+            path?.let {
+                ImageCropperActivity.launchCropper(requireContext(), it)
+            }?: Toast.makeText(requireContext(), "Please, take photo before see it", Toast.LENGTH_SHORT).show()
+        }
+        btnFiles.setOnClickListener {
+            MainActivity.changeFragment(requireActivity(), ListPhotosFragment())
         }
 
     }
@@ -278,12 +267,11 @@ class CameraXFragment : Fragment(), LifecycleOwner {
         val imageCapture = ImageCapture(imageCaptureConfig)
 
         requireActivity().findViewById<ImageButton>(R.id.capture_button).setOnClickListener {
-
-            val file = File(requireActivity().externalMediaDirs.first(),
-                "${System.currentTimeMillis()}.jpg")
+            val file = requireActivity().getOutputMediaFile(NORMAL_PATH_FOLDER, "${System.currentTimeMillis()}.jpg")
             imageCapture.takePicture(file, object : ImageCapture.OnImageSavedListener{
                 override fun onImageSaved(file: File) {
-                    val msg = "Photo capture succeeded: ${file.absolutePath}"
+                    path = file.absolutePath
+                    val msg = "Photo capture succeeded: $path"
                     Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
                     Glide.with(lastPicture).load(file).into(lastPicture)
                 }

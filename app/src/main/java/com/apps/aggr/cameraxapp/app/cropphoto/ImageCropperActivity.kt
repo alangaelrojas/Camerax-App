@@ -1,5 +1,7 @@
-package com.apps.aggr.cameraxapp.cropphoto
+package com.apps.aggr.cameraxapp.app.cropphoto
 
+import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -12,6 +14,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.apps.aggr.cameraxapp.R
+import com.apps.aggr.cameraxapp.utils.Constants.CROPPED_PATH_FOLDER
+import com.apps.aggr.cameraxapp.utils.Constants.getOutputMediaFile
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.takusemba.cropme.CropLayout
@@ -84,7 +88,7 @@ class ImageCropperActivity : AppCompatActivity(), OnCropListener {
 
     private fun saveImageLocally(bitmap: Bitmap){
         try {
-            val pictureFile: File? = getOutputMediaFile()
+            val pictureFile: File? = getOutputMediaFile(CROPPED_PATH_FOLDER, "$fileName")
             if (pictureFile == null) {
                 Log.d("message", "Error creating media file, check storage permissions: ")
                 return
@@ -100,17 +104,6 @@ class ImageCropperActivity : AppCompatActivity(), OnCropListener {
         }
     }
 
-    private fun getOutputMediaFile(): File? {
-        var cache: String
-        val f: File? = externalCacheDir
-        return f?.let {
-            cache = it.absolutePath + "/cropped"
-            val newFile = File(cache)
-            if (!newFile.exists()) newFile.mkdirs()
-            File(cache, "$fileName")
-        }
-    }
-
     private fun rotateImage(degrees: Float, bitmap: Bitmap): Bitmap{
         val matrix = Matrix()
         matrix.postRotate(degrees)
@@ -119,5 +112,11 @@ class ImageCropperActivity : AppCompatActivity(), OnCropListener {
 
     companion object {
         const val IMAGE_EXTRA_NAME = "imageToCrop"
+
+        fun launchCropper(context: Context, path: String){
+            val intent = Intent(context, ImageCropperActivity::class.java)
+            intent.putExtra(IMAGE_EXTRA_NAME, path)
+            context.startActivity(intent)
+        }
     }
 }
