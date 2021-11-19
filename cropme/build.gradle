@@ -1,0 +1,22 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+  compileSdkVersion configs.compileSdkVersion
+  defaultConfig {
+    minSdkVersion configs.minSdkVersion
+    targetSdkVersion configs.targetSdkVersion
+  }
+  testOptions {
+    unitTests.returnDefaultValues = true
+  }
+}
+
+dependencies {
+  implementation deps.kotlin.stdlib
+  implementation deps.androidx.appcompat
+  implementation deps.androidx.dynamicAnimation
+  testImplementation deps.junit
+  testImplementation deps.truth
+  testImplementation deps.mockk
+}
