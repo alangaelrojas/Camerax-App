@@ -36,7 +36,6 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
         else supportFragmentManager.popBackStack()
     }
 
-
     companion object {
 
         fun changeFragment(activity: FragmentActivity, fragment: Fragment){

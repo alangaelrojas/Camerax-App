@@ -2,9 +2,8 @@ package com.apps.aggr.cameraxapp.cropphoto
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.os.Bundle
-import android.os.Environment
-import android.os.Environment.getExternalStorageDirectory
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
@@ -12,7 +11,6 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.fragment.app.FragmentActivity
 import com.apps.aggr.cameraxapp.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -46,7 +44,8 @@ class ImageCropperActivity : AppCompatActivity(), OnCropListener {
             val filePath = mSaveBit.path
             fileName = mSaveBit.name
             val bitmap = BitmapFactory.decodeFile(filePath)
-            cropLayout.setBitmap(bitmap)
+            val rotated = rotateImage(90F, bitmap)
+            cropLayout.setBitmap(rotated)
             cropLayout.addOnCropListener(this)
         }
     }
@@ -66,19 +65,17 @@ class ImageCropperActivity : AppCompatActivity(), OnCropListener {
     }
 
     override fun onSuccess(bitmap: Bitmap) {
-        val mBitmap: Bitmap? = bitmap
-        mBitmap?.let {
+        bitmap.let {
             progressBar.visibility = View.GONE
             val view = layoutInflater.inflate(R.layout.dialog_result, null)
-            view.findViewById<ImageView>(R.id.image).setImageBitmap(it)
-            saveImageLocally(it)
+            view.findViewById<ImageView>(R.id.image).setImageBitmap(bitmap)
+            saveImageLocally(bitmap)
             MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.dialog_title_result)
                 .setView(view)
                 .setPositiveButton(R.string.dialog_button_close) { dialog, _ -> dialog.dismiss() }
                 .show()
-        }?: Snackbar.make(parent, R.string.error_failed_to_clip_image, Snackbar.LENGTH_LONG).show()
-
+        }
     }
 
     override fun onFailure(e: Exception) {
@@ -86,12 +83,12 @@ class ImageCropperActivity : AppCompatActivity(), OnCropListener {
     }
 
     private fun saveImageLocally(bitmap: Bitmap){
-        val pictureFile: File? = getOutputMediaFile()
-        if (pictureFile == null) {
-            Log.d("message", "Error creating media file, check storage permissions: ")
-            return
-        }
         try {
+            val pictureFile: File? = getOutputMediaFile()
+            if (pictureFile == null) {
+                Log.d("message", "Error creating media file, check storage permissions: ")
+                return
+            }
             val fos = FileOutputStream(pictureFile)
             bitmap.compress(Bitmap.CompressFormat.PNG, 90, fos)
             fos.close()
@@ -104,25 +101,20 @@ class ImageCropperActivity : AppCompatActivity(), OnCropListener {
     }
 
     private fun getOutputMediaFile(): File? {
-        // To be safe, you should check that the SDCard is mounted
-        // using Environment.getExternalStorageState() before doing this.
-        val mediaStorageDir = File(
-            getExternalStorageDirectory()
-                .toString() + "/Android/data/"
-                    + applicationContext.packageName
-        )
-
-        // This location works best if you want the created images to be shared
-        // between applications and persist after your app has been uninstalled.
-
-        // Create the storage directory if it does not exist
-        if (!mediaStorageDir.exists()) {
-            if (!mediaStorageDir.mkdirs()) {
-                return null
-            }
+        var cache: String
+        val f: File? = externalCacheDir
+        return f?.let {
+            cache = it.absolutePath + "/cropped"
+            val newFile = File(cache)
+            if (!newFile.exists()) newFile.mkdirs()
+            File(cache, "$fileName")
         }
+    }
 
-        return File(mediaStorageDir.path + File.separator + fileName)
+    private fun rotateImage(degrees: Float, bitmap: Bitmap): Bitmap{
+        val matrix = Matrix()
+        matrix.postRotate(degrees)
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 
     companion object {
